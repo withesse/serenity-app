@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Serenity launch background. Deep-night base so the hand-off to the
+     Flutter splash screen has no visible flash. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/serenity_launch_bg"/>
+</layer-list>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Serenity</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>serenity_app</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+	<!-- Custom URL scheme for deep links like serenity://session/midnight-harbour.
+	     Paired with go_router's path-based routing below. Universal Links
+	     (https://...) require Associated Domains + apple-app-site-association;
+	     add those once the marketing domain is live. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.serenity.serenity_app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>serenity</string>
+			</array>
+		</dict>
+	</array>
+
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	</array>
+
+	<!-- Continue audio playback when the screen locks or the app is
+	     backgrounded. Required for meditation sessions. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+	</array>
+
+	<!-- Export compliance. Currently no non-exempt encryption is used
+	     (only standard HTTPS). Flip to true and add docs if that changes. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!-- Siri / Shortcuts activity type donated from SiriBridge. Required
+	     for the system to index the donation. -->
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.serenity.serenity_app.beginSession</string>
+	</array>
+
+	<!-- Permission strings shown in the iOS consent sheet. All of them are
+	     "may" features so the copy stays purpose-specific. -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>Serenity reads your Mindful Minutes so your progress carries over from the Health app.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Serenity adds your meditation and breathing sessions to the Health app as Mindful Minutes.</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Gentle daily and bedtime reminders help you show up for the practice.</string>
+
+	<!-- HealthKit entitlement is separate from the usage descriptions;
+	     add to Xcode capability sheet before enabling in code. -->
+</dict>
+</plist>
