@@ -1,0 +1,111 @@
+name: Release APK
+
+# Triggered by a version tag (`v1.2.3`) or manual dispatch. Builds
+# release-mode APKs (universal + per-ABI splits for smaller downloads)
+# and attaches them to a GitHub Release.
+#
+# Note: the APKs are signed with the debug keystore until a real
+# production keystore is provisioned (see
+# `android/app/build.gradle.kts`). Treat these builds as install-
+# anywhere demos, not Play Store submissions.
+#
+# Security note: `github.event.inputs.tag` is user-controlled on
+# workflow_dispatch (even with repo-write gating). The `run:` steps
+# below only read it through environment variables to avoid any
+# expression-injection surface in the shell.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build + release (e.g. v0.1.0). Must already exist.'
+        required: true
+      prerelease:
+        description: 'Mark release as prerelease'
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: 3.41.4
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build + publish
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install deps
+        run: flutter pub get
+
+      - name: Generate localisations
+        run: flutter gen-l10n
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Tests
+        run: flutter test
+
+      - name: Build universal release APK
+        run: flutter build apk --release
+
+      - name: Build per-ABI release APKs
+        run: flutter build apk --release --split-per-abi
+
+      - name: Rename artifacts
+        # Prefix artifacts with the tag so a user downloading across
+        # releases can tell them apart at a glance. Tag value reaches
+        # the shell only via $RELEASE_TAG so it stays quoted.
+        run: |
+          mkdir -p release-artifacts
+          cp build/app/outputs/flutter-apk/app-release.apk              "release-artifacts/serenity-${RELEASE_TAG}-universal.apk"
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "release-artifacts/serenity-${RELEASE_TAG}-armeabi-v7a.apk"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk   "release-artifacts/serenity-${RELEASE_TAG}-arm64-v8a.apk"
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk      "release-artifacts/serenity-${RELEASE_TAG}-x86_64.apk"
+          ls -lh release-artifacts/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_TAG }}
+          generate_release_notes: true
+          prerelease: ${{ github.event.inputs.prerelease || true }}
+          body: |
+            Debug-signed release build. Install anywhere, not Play Store ready.
+
+            Pick one:
+            - `serenity-<tag>-arm64-v8a.apk` — modern Android phones (recommended)
+            - `serenity-<tag>-armeabi-v7a.apk` — older 32-bit ARM devices
+            - `serenity-<tag>-x86_64.apk` — emulators on x86 laptops
+            - `serenity-<tag>-universal.apk` — one binary for every ABI (larger)
+          files: |
+            release-artifacts/serenity-*-universal.apk
+            release-artifacts/serenity-*-armeabi-v7a.apk
+            release-artifacts/serenity-*-arm64-v8a.apk
+            release-artifacts/serenity-*-x86_64.apk
